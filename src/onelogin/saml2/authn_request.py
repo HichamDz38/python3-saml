@@ -100,18 +100,20 @@ class OneLogin_Saml2_Authn_Request(object):
         if not security["requestedAuthnContext"]:
             authn_comparison = security["requestedAuthnContextComparison"]
 
-            if security["requestedAuthnContext"]:
+            if isinstance(security["requestedAuthnContext"], list):
+                requested_authn_context_str = '     <samlp:RequestedAuthnContext Comparison="%s">' % authn_comparison
+                for authn_context in security["requestedAuthnContext"]:
+                    requested_authn_context_str += "<saml:AuthnContextClassRef>%s</saml:AuthnContextClassRef>" % authn_context
+                requested_authn_context_str += "    </samlp:RequestedAuthnContext>"
+
+            else:
                 requested_authn_context_str = (
                     """    <samlp:RequestedAuthnContext Comparison="%s">
         <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml:AuthnContextClassRef>
     </samlp:RequestedAuthnContext>"""
                     % authn_comparison
                 )
-            else:
-                requested_authn_context_str = '     <samlp:RequestedAuthnContext Comparison="%s">' % authn_comparison
-                for authn_context in security["requestedAuthnContext"]:
-                    requested_authn_context_str += "<saml:AuthnContextClassRef>%s</saml:AuthnContextClassRef>" % authn_context
-                requested_authn_context_str += "    </samlp:RequestedAuthnContext>"
+               
 
         attr_consuming_service_str = ""
         if "attributeConsumingService" in sp_data and sp_data["attributeConsumingService"]:
